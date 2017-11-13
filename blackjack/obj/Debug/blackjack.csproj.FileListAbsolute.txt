@@ -1,0 +1,9 @@
+C:\Users\admin\Desktop\H1\blackjack\blackjack\bin\Debug\blackjack.exe.config
+C:\Users\admin\Desktop\H1\blackjack\blackjack\bin\Debug\blackjack.exe
+C:\Users\admin\Desktop\H1\blackjack\blackjack\bin\Debug\blackjack.pdb
+C:\Users\admin\Desktop\H1\blackjack\blackjack\bin\Debug\MySql.Data.dll
+C:\Users\admin\Desktop\H1\blackjack\blackjack\bin\Debug\MySql.Data.xml
+C:\Users\admin\Desktop\H1\blackjack\blackjack\obj\Debug\blackjack.csprojResolveAssemblyReference.cache
+C:\Users\admin\Desktop\H1\blackjack\blackjack\obj\Debug\blackjack.csproj.CoreCompileInputs.cache
+C:\Users\admin\Desktop\H1\blackjack\blackjack\obj\Debug\blackjack.exe
+C:\Users\admin\Desktop\H1\blackjack\blackjack\obj\Debug\blackjack.pdb
