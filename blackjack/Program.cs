@@ -10,7 +10,9 @@ using System.Threading;
 namespace ConsoleApp1
 
 {
-
+    /// <summary>
+    /// Genere hænder for både spiller, spillerens splittede hånd og dealers hånd
+    /// </summary>
     class Player
     {
         public bool handStand = false;
@@ -28,22 +30,28 @@ namespace ConsoleApp1
     class Program
     {
 
+        //generere de 3 spilbare hænder og assigner dem til de individuelle classes
         public static Player player = new Player();
         public static Player playerSplit = new Player();
         public static Player dealer = new Player();
 
+        //Laver arrays til de 52 kort og de 4 kulørere
         static string[] cards = new string[52];
         static string[] suits = new string[4];
 
+        //mine statiske bools der skal tilgåes fra flere funktioner.
         static bool playerDidSplit = false;
         static bool choosing = true;
         static bool splitActive = false;
 
+        // mine statiske ints der skal tilgåes fra flere funktioner.
         static int playerBet = 0;
         static int valuta = 0;
 
+        //random number generator brugt til at vælge et tilfældigt kort
         static Random cardPicker = new Random();
 
+        //Sql connection informationer samt username variabel der bruges til at logge ind i spil samt trække informationer ud af sql table
         static string username = "";
         static string sql = "SELECT * FROM brugere";
         static string mySqlConnectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=blackjack";
@@ -52,8 +60,6 @@ namespace ConsoleApp1
 
         static void Main(string[] args)
         {
-
-            //Opsæt af database forbindelse
             
 
             //gemmer Brugernavne og Passwords og valuta ned fra database, da jeg ikke kan finde på en bedre måde at checke på dem i c#
@@ -67,8 +73,8 @@ namespace ConsoleApp1
             suits[2] = "c";
             suits[3] = "d";
 
+           
             //laver en række variabler der skal bruges i spillet
-            
             string password = "";
             string newuser = "";
             string newpass = "";
@@ -135,10 +141,17 @@ namespace ConsoleApp1
 
                     }
                     password = Console.ReadLine();
+
+                    //Generer sql kommando til at indsætte brugernavn og kodeord i database
                     sql = "INSERT INTO brugere(brugernavn,kodeord,valuta) VALUES ('" + username + "','" + password + "','" + 500 + "')";
                     MySqlCommand insertion = databaseConnection.CreateCommand();
+
+                    //tilføjer brugernavn, kode og penge til deres lists så spillet ikke skal genstartes efter oprettelse
                     usernames.Add(username);
                     passwords.Add(password);
+                    balance.Add(500);
+
+                    //kører den tidligere generede sql kommando og gemmer bruger, kode og penge i database for long term storage
                     insertion.CommandText = sql;
                     databaseConnection.Open();
                     insertion.ExecuteNonQuery();
@@ -147,12 +160,15 @@ namespace ConsoleApp1
 
                 }
 
+                //tjekker om der er skrevet noget i username
                 if (username != "")
                 {
+
                     wrongCounter = 0;
                     Console.WriteLine("Please enter your Password: ");
                     password = Console.ReadLine();
 
+                    //for loop der iterere gennem alle brugernavne og kodeord for at finde et match, hvis alle forsøg fejler sendes fejlmeddelse
                     for (int i = 0; i < usernames.Count(); i++)
                     {
                         if (username == usernames[i] && password == passwords[i])
@@ -184,8 +200,13 @@ namespace ConsoleApp1
                 Console.WriteLine("The house will always hit on 16, and stand on 17");
                 Console.WriteLine("please enter the amount you would like to bet: ");
 
+
+                //loop der kører indtil spiller har valgt et beløb at satse
                 while (playerBet == 0)
                 {
+
+                    //try catch der fanger bets under minimum indsats eller forsøg på at satse mere end der er på kontoen
+                    //samt sørger for at der kun kan indtastes tal
                     try
                     {
                         playerBet = int.Parse(Console.ReadLine());
@@ -203,10 +224,14 @@ namespace ConsoleApp1
 
                     }
                 }
+
                 Console.Clear();
                 Console.WriteLine("Your bet of " + playerBet + " has been accepted, dealing hands");
+
+                //funktion kaldes med argumentet new der giver spiller og dealer 2 kort hver
                 DealHand("new");
 
+                //propper de 2 kort som spiller har fået i den string der skrives ud så man kan se sin hånd
                 for (int i = 0; i < player.hand.Count(); i++)
                 {
                     player.handShow += player.hand[i];
@@ -215,19 +240,25 @@ namespace ConsoleApp1
 
                 Console.WriteLine(player.handShow);
 
+                //det samme gøres her for dealer dog kun med 1 kort da dealers kort 2 er skjult i blackjack
                 dealer.handShow += dealer.hand[0];
                 
 
                 Console.WriteLine(dealer.handShow);
 
                 splitCheck = true;
+
+                //while loop der kører så længe spilleren ikke har "standed"
                 while (choosing)
                 {
                     
+                    //tjekker at spilleren ikke har standed og om spilleren kun har 2 kort på hånden for at give mulighed for double
                     if (player.handStand != true && player.hand.Count() == 2)
                     {
                         Console.WriteLine("Please Choose your next action (stand) (hit) (double)");
                         playerAction = Console.ReadLine();
+
+                        //de forskellige if statements til de forskellige valg spilleren har
                         if (playerAction == "stand")
                         {
                             Stand(player);
@@ -256,6 +287,8 @@ namespace ConsoleApp1
                         Console.WriteLine(player.handShow);
 
                     }
+
+                    // samme som ovenover bare uden check på håndens størrelse og uden double mulighed
                     else if (player.handStand != true)
                     {
                         while (player.handStand == false)
@@ -284,6 +317,9 @@ namespace ConsoleApp1
                         }
                     }
 
+
+                    //begyndende kode til split funktionen der ikke er skrevet færdig endnu
+                    /*
                     if (splitActive == true && playerSplit.handStand != true)
                     {
                         while (playerSplit.handStand == true)
@@ -310,16 +346,24 @@ namespace ConsoleApp1
                             }
 
                         }
-                    }
+                    } */
                 }
+
+                //spiller er færdig med at spille, så dealerens hånd køres igennem
                 DealerPlays();
+
+                //kalkulere om spiller har vundet eller tabt sin hånd
                 CalculateWin();
+
+                //blander kortene og starter spillet forfra
                 ShuffleDeck();
 
             }
         }
 
-
+        /// <summary>
+        /// Funktion der spiller dealerens hånd. tjekker om dealer skal hit eller stand
+        /// </summary>
         static void DealerPlays()
         {
             bool dealerPlaying = true;
@@ -345,6 +389,10 @@ namespace ConsoleApp1
             
         }
 
+
+        /// <summary>
+        /// tjekker de forskellige værdier på hænderne op mod hinanden, og udbetaler gevinst eller tager indsats
+        /// </summary>
         static void CalculateWin()
         {
             if (player.handBust == true)
@@ -403,6 +451,8 @@ namespace ConsoleApp1
             {
                 Console.WriteLine("your second hand is equal you push");
             }
+
+            //opdatere spillerens pengepung i databasen så de gemmes ved spil luk
             sql = "UPDATE brugere SET valuta = "+valuta+" WHERE brugernavn = '"+username+"'";
             MySqlCommand insertion = databaseConnection.CreateCommand();
             insertion.CommandText = sql;
@@ -412,7 +462,10 @@ namespace ConsoleApp1
         }
 
 
-
+        /// <summary>
+        /// udregner værdien på den hånd der bliver send som argument
+        /// </summary>
+        /// <param name="who">navnet på den spiller der stander</param>
         static void Stand(Player who)
         {
             int cardcount = 0;
@@ -467,7 +520,11 @@ namespace ConsoleApp1
             }
         }
 
-        static void Split(Player who)
+
+        /// <summary>
+        /// split funktion der ikke er lavet endnu
+        /// </summary>
+        static void Split()
         {
             playerSplit.hand.Add(player.hand[1]);
             player.hand.RemoveAt(1);
